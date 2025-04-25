@@ -24,21 +24,20 @@ function create {
 
 function get_gitignore() {
     # Get correct gitignore template language
-    if [[ -e "~/scripts/gitignore-templates/$1.gitignore" ]]
+    if [[ -e "$HOME/scripts/gitignore-templates/$1.gitignore" ]]
     then
-        cp ~/scripts/gitignore-templates/$1.gitignore .
+        cp "$HOME/scripts/gitignore-templates/$1.gitignore" "./"
     else
         echo "unrecognized language $1"
         exit 1
     fi
-    echo "git project setup successfully with language $1"
+    echo "git project setup successfully, gitignored $1"
 }
 
 function git_init {
     if ! [[ -d '.git' ]]
         then
             git init
-            echo 'git project setup successfully'
     else
         echo 'git repository already exists'
             exit 1
@@ -57,6 +56,7 @@ elif [[ $1 == "new" && $2 == "git" && $# -eq 2 ]]
 then
     create
     git_init
+    echo 'git project setup successfully'
     exit 0
 
 # Setup Git Project with specific known language
@@ -66,6 +66,13 @@ then
     create
     git_init
     get_gitignore $language
+    exit 0
+
+# OPTIMIZE: instead of multiple elifs doing the same thing do like a fall through
+# Simply add a gitignore of specified language
+elif [[ $1 == "gitignore" && $# -eq 2 ]]
+then
+    get_gitignore $2
     exit 0
 
 # Backup src directory
