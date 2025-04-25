@@ -1,6 +1,6 @@
 #/bin/bash
 
-if [[ ($# -ne 1) || ($# -ne 2) || ($# -ne 3) ]]
+if [[ ($# -lt 1) || ($# -gt 3) ]]
 then
     echo 'error: wrong usage. type m for help'
     exit 1
@@ -22,6 +22,29 @@ function create {
     fi
 }
 
+function get_gitignore() {
+    # Get correct gitignore template language
+    if [[ -e "~/scripts/gitignore-templates/$1.gitignore" ]]
+    then
+        cp ~/scripts/gitignore-templates/$1.gitignore .
+    else
+        echo "unrecognized language $1"
+        exit 1
+    fi
+    echo "git project setup successfully with language $1"
+}
+
+function git_init {
+    if ! [[ -d '.git' ]]
+        then
+            git init
+            echo 'git project setup successfully'
+    else
+        echo 'git repository already exists'
+            exit 1
+            fi
+}
+
 # Setup project
 if [[ $1 == "new" && $# -eq 1 ]]
 then
@@ -33,18 +56,16 @@ then
 elif [[ $1 == "new" && $2 == "git" && $# -eq 2 ]]
 then
     create
-    git init
-    touch .gitignore
-    echo 'git project setup successfully'
+    git_init
     exit 0
 
 # Setup Git Project with specific known language
 elif [[ $1 == "new" && $2 == "git" && $# -eq 3 ]]
 then
-    language=$3
+    language=${3^}
     create
-    git init
-    echo 'git project setup successfully'
+    git_init
+    get_gitignore $language
     exit 0
 
 # Backup src directory
@@ -53,10 +74,10 @@ then
     echo 'backing up src...'
     if ! [[ -d 'src' ]]
     then
-        echo 'src directory does not exist.'
+        echo 'src directory does not exist'
     elif ! [[ -d 'backups' ]]
     then
-        echo 'backup directory does not exist.'
+        echo 'backup directory does not exist'
     fi
     date=$(date '+%Y-%m-%d')
     tar -czvf "backups/backup-$date" src
